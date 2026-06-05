@@ -2,15 +2,11 @@
   "expo": {
     "name": "SkySync",
     "slug": "skysync-weather-ai",
+    "owner": "brian_kiboi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-skysync.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/skysync-logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#2A1A5E"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.skysync.weatherai"
@@ -18,15 +14,30 @@
     "android": {
       "package": "com.skysync.weatherai",
       "adaptiveIcon": {
-        "backgroundColor": "#2A1A5E",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#250E52",
+        "foregroundImage": "./assets/icon-skysync.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "73425dcd-b524-4ab0-9943-2a0cf83077b9"
+      }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/skysync-logo.png",
+          "imageWidth": 240,
+          "resizeMode": "contain",
+          "backgroundColor": "#250E52"
+        }
+      ],
+      "expo-font"
+    ]
   }
 }
