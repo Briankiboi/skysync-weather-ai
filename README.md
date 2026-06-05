@@ -165,7 +165,7 @@ npx eas-cli build --platform android --profile preview   # installable APK
 
 ## License
 
-MIT — see [LICENSE](app/LICENSE).
+MIT see [LICENSE](app/LICENSE).
 
 ---
 
