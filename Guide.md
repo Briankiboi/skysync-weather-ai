@@ -87,7 +87,7 @@ Phase 6: offline-first behavior
 
 
 Phase 7: quality
-1. Keep components small.
+1. Keep components organised.
 2. Add strong TypeScript types.
 3. Keep the UI minimal, modern, and easy to review.
 4. Add a clear README.

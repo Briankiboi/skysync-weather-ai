@@ -1,67 +1,83 @@
 import { StyleSheet, Switch, View } from 'react-native';
-import { Button, Card, Screen, ThemedText } from '../components';
-import { useSettingsStore } from '../store/settingsStore';
-import { colors, spacing } from '../theme';
+import { Card, Screen, Segmented, ThemedText } from '@/components';
+import { useAppWeather } from '@/hooks/useAppWeather';
+import { useSettingsStore } from '@/store/settingsStore';
+import { spacing } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
+import { Units } from '@/types/settings';
+import { countryFlag } from '@/utils/country';
 
-/** Settings — fully wired to the persisted Zustand store. */
+/** Settings — units, AI summary, and saved locations (Phase 5). */
 export function SettingsScreen() {
+  const { colors } = useTheme();
   const units = useSettingsStore((s) => s.units);
-  const toggleUnits = useSettingsStore((s) => s.toggleUnits);
+  const setUnits = useSettingsStore((s) => s.setUnits);
   const aiSummaryEnabled = useSettingsStore((s) => s.aiSummaryEnabled);
   const setAiSummaryEnabled = useSettingsStore((s) => s.setAiSummaryEnabled);
   const savedLocations = useSettingsStore((s) => s.savedLocations);
+
+  const { place, countryCode } = useAppWeather();
 
   return (
     <Screen scroll>
       <ThemedText variant="title">Settings</ThemedText>
 
+      {/* Units */}
       <Card style={styles.card}>
-        <View style={styles.row}>
-          <View style={styles.rowText}>
-            <ThemedText variant="body">Units</ThemedText>
-            <ThemedText variant="caption" muted>
-              {units === 'metric' ? 'Metric (°C, km/h)' : 'Imperial (°F, mph)'}
-            </ThemedText>
-          </View>
-          <Button
-            label={units === 'metric' ? 'Metric' : 'Imperial'}
-            variant="secondary"
-            onPress={toggleUnits}
-            style={styles.unitBtn}
-          />
+        <View style={styles.rowText}>
+          <ThemedText variant="body">Units</ThemedText>
+          <ThemedText variant="caption" muted>
+            {units === 'metric' ? 'Celsius · km/h' : 'Fahrenheit · mph'}
+          </ThemedText>
         </View>
+        <Segmented<Units>
+          options={[
+            { label: '°C', value: 'metric' },
+            { label: '°F', value: 'imperial' },
+          ]}
+          value={units}
+          onChange={setUnits}
+        />
       </Card>
 
+      {/* AI summary */}
       <Card style={styles.card}>
         <View style={styles.row}>
           <View style={styles.rowText}>
-            <ThemedText variant="body">AI summary</ThemedText>
+            <ThemedText variant="body">Daily summary</ThemedText>
             <ThemedText variant="caption" muted>
-              Show a smart written summary of conditions
+              A short, written overview of today’s weather
             </ThemedText>
           </View>
           <Switch
             value={aiSummaryEnabled}
             onValueChange={setAiSummaryEnabled}
-            trackColor={{ true: colors.accent, false: colors.surfaceMuted }}
-            thumbColor={colors.text}
+            trackColor={{ true: colors.primary, false: colors.surfaceMuted }}
+            thumbColor={colors.onPrimary}
           />
         </View>
       </Card>
 
+      {/* Saved locations */}
       <Card style={styles.card}>
-        <ThemedText variant="body">Saved locations</ThemedText>
-        {savedLocations.length === 0 ? (
-          <ThemedText variant="caption" muted style={styles.spacer}>
-            No saved locations yet.
+        <ThemedText variant="body">Locations</ThemedText>
+
+        <View style={styles.locationRow}>
+          <ThemedText variant="body">
+            {countryFlag(countryCode)} {place}
           </ThemedText>
-        ) : (
-          savedLocations.map((loc) => (
-            <ThemedText key={loc.id} variant="caption" style={styles.spacer}>
-              {loc.name}
+          <View style={[styles.badge, { backgroundColor: colors.surfaceMuted }]}>
+            <ThemedText variant="caption" muted>
+              Current
             </ThemedText>
-          ))
-        )}
+          </View>
+        </View>
+
+        {savedLocations.map((loc) => (
+          <View key={loc.id} style={styles.locationRow}>
+            <ThemedText variant="body">{loc.name}</ThemedText>
+          </View>
+        ))}
       </Card>
     </Screen>
   );
@@ -70,6 +86,7 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   card: {
     marginTop: spacing.lg,
+    gap: spacing.md,
   },
   row: {
     flexDirection: 'row',
@@ -81,11 +98,14 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingRight: spacing.md,
   },
-  unitBtn: {
-    minHeight: 40,
-    paddingHorizontal: spacing.lg,
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  spacer: {
-    marginTop: spacing.sm,
+  badge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 999,
   },
 });

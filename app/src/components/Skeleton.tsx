@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, ViewStyle } from 'react-native';
-import { colors, radius } from '../theme';
+import { radius } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 
 type Props = {
   width?: number | `${number}%`;
@@ -10,6 +11,7 @@ type Props = {
 
 /** Pulsing placeholder block shown while data loads. */
 export function Skeleton({ width = '100%', height = 16, style }: Props) {
+  const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -33,14 +35,17 @@ export function Skeleton({ width = '100%', height = 16, style }: Props) {
 
   return (
     <Animated.View
-      style={[styles.block, { width, height, opacity }, style]}
+      style={[
+        styles.block,
+        { width, height, opacity, backgroundColor: colors.surfaceMuted },
+        style,
+      ]}
     />
   );
 }
 
 const styles = StyleSheet.create({
   block: {
-    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.sm,
   },
 });

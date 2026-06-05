@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "SkySync",
+    "name": "SkySync Weather ai",
     "slug": "skysync-weather-ai",
     "owner": "brian_kiboi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon-skysync.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.skysync.weatherai"
@@ -15,7 +15,7 @@
       "package": "com.skysync.weatherai",
       "adaptiveIcon": {
         "backgroundColor": "#250E52",
-        "foregroundImage": "./assets/icon-skysync.png"
+        "foregroundImage": "./assets/adaptive-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -34,7 +34,8 @@
           "image": "./assets/skysync-logo.png",
           "imageWidth": 240,
           "resizeMode": "contain",
-          "backgroundColor": "#250E52"
+          "backgroundColor": "#250E52",
+          "fade": true
         }
       ],
       "expo-font"

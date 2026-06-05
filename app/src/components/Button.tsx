@@ -4,7 +4,8 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { colors, radius, spacing } from '../theme';
+import { radius, spacing } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import { ThemedText } from './ThemedText';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
@@ -27,27 +28,37 @@ export function Button({
   disabled,
   style,
 }: Props) {
+  const { colors } = useTheme();
   const isDisabled = disabled || loading;
+  const labelColor = variant === 'primary' ? colors.onPrimary : colors.text;
+
+  const variantStyle: ViewStyle =
+    variant === 'primary'
+      ? { backgroundColor: colors.primary }
+      : variant === 'secondary'
+        ? {
+            backgroundColor: colors.background,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }
+        : { backgroundColor: 'transparent' };
+
   return (
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        variantStyles[variant],
+        variantStyle,
         pressed && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.background : colors.text} />
+        <ActivityIndicator color={labelColor} />
       ) : (
-        <ThemedText
-          variant="body"
-          color={variant === 'primary' ? colors.background : colors.text}
-          style={styles.label}
-        >
+        <ThemedText variant="body" color={labelColor} style={styles.label}>
           {label}
         </ThemedText>
       )}
@@ -73,9 +84,3 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 });
-
-const variantStyles: Record<Variant, ViewStyle> = {
-  primary: { backgroundColor: colors.accent },
-  secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  ghost: { backgroundColor: 'transparent' },
-};

@@ -9,11 +9,15 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 min — weather doesn't change every second
+      // Weather data is hourly — treat it as fresh for 30 min so we don't
+      // refetch on every screen mount / remount. This is the main lever for
+      // keeping API usage low.
+      staleTime: 30 * 60 * 1000, // 30 min
       gcTime: 24 * 60 * 60 * 1000, // keep cache 24h for offline use
-      retry: 2,
+      retry: 1, // one retry on transient failure (was 2) — fewer wasted calls
       retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false, // don't auto-refetch just because network blipped
     },
   },
 });

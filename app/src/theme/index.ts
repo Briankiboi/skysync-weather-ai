@@ -1,35 +1,136 @@
 /**
- * SkySync design tokens.
- * Colors derived from the brand logo (deep purple background, sunny yellow,
- * sky blues). Keep all visual constants here so screens/components stay clean.
+ * SkySync design tokens — premium theme with automatic light/dark support.
+ *
+ * Light: white background, deep-navy text, sky-blue accents.
+ * Dark:  deep-navy background, light text, same sky-blue accents.
+ * Inspired by Apple Weather + Linear. The active palette follows the phone's
+ * system color scheme (see useTheme()).
  */
 
-export const colors = {
-  // Brand
-  background: '#250E52',
-  backgroundAlt: '#2E1A66',
-  surface: '#352074',
-  surfaceMuted: '#3D2A80',
+const palette = {
+  // Shared brand blues (same in both schemes for a consistent accent)
+  blue: '#3B82F6',
+  blueDeep: '#2563EB',
+  blueLight: '#60A5FA',
+  success: '#22C55E',
+  warning: '#F59E0B',
+  danger: '#EF4444',
+  white: '#FFFFFF',
+} as const;
 
-  // Accents
-  primary: '#7FD7FF', // sky blue
-  accent: '#F4C430', // sun yellow
-  cloud: '#36BFFA',
+type ColorTokens = {
+  background: string;
+  backgroundAlt: string;
+  surface: string;
+  /** Translucent card fill that sits over the weather gradient. */
+  cardSurface: string;
+  surfaceMuted: string;
+  primary: string;
+  primaryDark: string;
+  highlight: string;
+  accent: string;
+  cloud: string;
+  tabActive: string;
+  text: string;
+  textMuted: string;
+  textFaint: string;
+  onPrimary: string;
+  success: string;
+  warning: string;
+  danger: string;
+  border: string;
+  overlay: string;
+  shadowColor: string;
+  shadowOpacity: number;
+  // Ambient weather backdrop
+  gradient: [string, string, string]; // top -> bottom background wash
+  glowSun: string; // warm radial glow (top-right)
+  glowSky: string; // cool radial glow (lower-left)
+};
+
+export const lightColors: ColorTokens = {
+  // Surfaces
+  background: palette.white,
+  backgroundAlt: '#F8FAFC',
+  surface: '#F8FAFC',
+  cardSurface: 'rgba(255,255,255,0.85)', // frosted white over the gradient
+  surfaceMuted: '#EEF2F7',
+
+  // Brand
+  primary: palette.blue,
+  primaryDark: palette.blueDeep,
+  highlight: palette.blueLight,
+  accent: palette.blue,
+  cloud: palette.blueLight,
+  tabActive: palette.blue, // active tab = blue in light mode
 
   // Text
-  text: '#FFFFFF',
-  textMuted: '#B8AEDC',
-  textFaint: '#8A7FB8',
+  text: '#0F172A',
+  textMuted: '#64748B',
+  textFaint: '#94A3B8',
+  onPrimary: palette.white,
+
+  // Status
+  success: palette.success,
+  warning: palette.warning,
+  danger: palette.danger,
+
+  // Lines
+  border: '#E2E8F0',
+  overlay: 'rgba(15,23,42,0.35)',
+
+  // Elevation
+  shadowColor: '#0F172A',
+  shadowOpacity: 0.06,
+
+  // Ambient weather backdrop — airy sky wash, warm sun + soft blue glows
+  gradient: ['#E8F2FF', '#F3F8FF', '#FFFFFF'],
+  glowSun: 'rgba(245,196,72,0.20)',
+  glowSky: 'rgba(96,165,250,0.18)',
+};
+
+export const darkColors: ColorTokens = {
+  // Surfaces — modern deep navy (matches the weather gradient)
+  background: '#0C1426',
+  backgroundAlt: '#101B33',
+  surface: '#172642',
+  cardSurface: 'rgba(255,255,255,0.06)', // subtle frosted light over the gradient
+  surfaceMuted: '#1E2C49',
+
+  // Brand
+  primary: palette.blueLight, // bright sky blue
+  primaryDark: palette.blueDeep,
+  highlight: palette.blueLight,
+  accent: palette.blue,
+  cloud: palette.blueLight,
+  tabActive: palette.blueLight, // active tab = bright blue (modern)
+
+  // Text — bright for strong contrast on navy
+  text: '#F1F5F9',
+  textMuted: '#AEB9CC',
+  textFaint: '#7C8AA3',
+  onPrimary: '#0B1226',
 
   // Status
   success: '#34D399',
   warning: '#FBBF24',
   danger: '#F87171',
 
-  // Lines / borders
-  border: 'rgba(255,255,255,0.10)',
-  overlay: 'rgba(0,0,0,0.35)',
-} as const;
+  // Lines
+  border: 'rgba(255,255,255,0.12)',
+  overlay: 'rgba(0,0,0,0.5)',
+
+  // Elevation
+  shadowColor: '#000000',
+  shadowOpacity: 0.3,
+
+  // Ambient weather backdrop — modern deep navy
+  gradient: ['#0E1730', '#14213F', '#0B1226'],
+  glowSun: 'rgba(96,165,250,0.10)',
+  glowSky: 'rgba(96,165,250,0.12)',
+};
+
+export type Colors = ColorTokens;
 
 export const spacing = {
   xs: 4,
@@ -66,14 +167,15 @@ export const fontWeight = {
   heavy: '800',
 } as const;
 
-export type ThemeColor = keyof typeof colors;
+/** Soft card elevation built from the active scheme's shadow values. */
+export function cardShadow(colors: Colors) {
+  return {
+    shadowColor: colors.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: colors.shadowOpacity,
+    shadowRadius: 12,
+    elevation: 2,
+  } as const;
+}
 
-export const theme = {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  fontWeight,
-} as const;
-
-export type Theme = typeof theme;
+export type ColorScheme = 'light' | 'dark';

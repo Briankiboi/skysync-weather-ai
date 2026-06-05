@@ -3,3 +3,7 @@ export { ThemedText } from './ThemedText';
 export { Card } from './Card';
 export { Button } from './Button';
 export { Skeleton } from './Skeleton';
+export { AnimatedSplash } from './AnimatedSplash';
+export { WeatherBackground } from './WeatherBackground';
+export { HourlyStrip } from './HourlyStrip';
+export { Segmented } from './Segmented';

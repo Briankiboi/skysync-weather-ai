@@ -1,5 +1,6 @@
 import { Text as RNText, StyleSheet, TextProps } from 'react-native';
-import { colors, fontSize, fontWeight } from '../theme';
+import { fontSize, fontWeight } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 
 type Variant = 'display' | 'title' | 'heading' | 'body' | 'caption' | 'label';
 
@@ -17,6 +18,7 @@ export function ThemedText({
   style,
   ...rest
 }: Props) {
+  const { colors } = useTheme();
   const resolved = color ?? (muted ? colors.textMuted : colors.text);
   return <RNText style={[styles[variant], { color: resolved }, style]} {...rest} />;
 }
