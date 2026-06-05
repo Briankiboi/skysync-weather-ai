@@ -1,8 +1,8 @@
 <div align="center">
 
-# SkySync weather-ai 🌤️
+# SkySync Weather-ai 🌤️
 
-SkySync Weather is a modern weather intelligence application built with React Native and TypeScript.
+SkySync is a modern weather intelligence application built with React Native and TypeScript.
 
 The app integrates directly with [WeatherAI](https://weather-ai.co) API to deliver real-time weather conditions, hourly forecasts, daily forecasts, and meaningful weather insights through a clean, responsive, and intuitive mobile experience.Built with a scalable architecture powered by TanStack Query, Zustand, and persistent local caching, SkySync demonstrates efficient data synchronization, intelligent refresh management, robust state handling, and high-performance cross-platform development for both **Android and iOS** from one codebase.
 
