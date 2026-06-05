@@ -3,6 +3,7 @@ import { RefreshControl, StyleSheet, View } from 'react-native';
 import {
   Card,
   EmptyState,
+  ErrorState,
   OfflineBanner,
   Screen,
   Skeleton,
@@ -63,12 +64,9 @@ export function UsageScreen() {
           <Skeleton width="100%" height={10} style={{ marginTop: spacing.md }} />
         </Card>
       ) : error && !data ? (
-        <Card style={styles.card}>
-          <ThemedText variant="body">Couldn’t load usage</ThemedText>
-          <ThemedText variant="caption" muted>
-            {error.message}
-          </ThemedText>
-        </Card>
+        <View style={styles.errorWrap}>
+          <ErrorState error={error} onRetry={() => refetch()} />
+        </View>
       ) : data ? (
         <>
           <Card style={styles.card}>
@@ -151,6 +149,9 @@ function resetDate(iso: string | null): string {
 const styles = StyleSheet.create({
   subtitle: {
     marginTop: spacing.xs,
+  },
+  errorWrap: {
+    marginTop: spacing.xxl,
   },
   card: {
     marginTop: spacing.md,

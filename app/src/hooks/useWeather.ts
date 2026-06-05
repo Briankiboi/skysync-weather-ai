@@ -71,5 +71,10 @@ export function useUsage() {
   return useQuery({
     queryKey: weatherKeys.usage,
     queryFn: getUsage,
+    // /v1/usage is free (no quota cost), so unlike the weather queries it can
+    // recover automatically when the network comes back and retry more.
+    refetchOnReconnect: true,
+    staleTime: 60_000,
+    retry: 2,
   });
 }

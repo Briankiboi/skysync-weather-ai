@@ -2,7 +2,7 @@
 
 # SkySync 🌤️
 
-**Your Weather Intelligence**  a production-quality, offline-first weather app built with React Native and TypeScript.
+** Weather Intelligence**  a production-quality, offline-first weather app built with React Native and TypeScript.
 
 SkySync integrates the [WeatherAI](https://weather-ai.co) API directly, with a single clean API client, smart caching, an offline-first data layer, and a polished, adaptive UI that runs on **Android and iOS** from one codebase.
 
@@ -41,7 +41,7 @@ SkySync integrates the [WeatherAI](https://weather-ai.co) API directly, with a s
 
 ## Project Structure
 
-The app lives in [`app/`](app/). Source is organized by responsibility; components are kept small and the `@/` alias avoids deep relative imports.
+Source  code files are  organized by responsibility; components are kept clean and scalable to avoid deep relative imports in future.
 
 ```
 app/src/
@@ -77,13 +77,11 @@ app/src/
     └── storage.ts           # swappable persistence (AsyncStorage → MMKV)
 ```
 
-**Architecture:** layered — **UI** (screens/components) → **State** (Zustand + TanStack Query) → **Services** (`src/api`) → **Persistence** (`src/utils/storage`).
-
 ---
 
 ## WeatherAI Integration
 
-A **single API client** ([`app/src/api/client.ts`](app/src/api/client.ts)) handles auth, base URL, and error mapping. The six endpoint functions live in [`app/src/api/weather.ts`](app/src/api/weather.ts):
+A **single API client** handles auth, base URL, and error mapping. The six endpoint functions:
 
 | Endpoint | Function | Used for |
 |----------|----------|----------|
@@ -94,10 +92,6 @@ A **single API client** ([`app/src/api/client.ts`](app/src/api/client.ts)) handl
 | `GET /v1/hourly` | `getHourly` | Hourly forecast |
 | `GET /v1/usage` | `getUsage` | Account quota |
 
-- **Auth:** `Authorization: Bearer <key>` — key read from `EXPO_PUBLIC_WEATHERAI_KEY`.
-- **Base URL:** `EXPO_PUBLIC_WEATHERAI_BASE_URL` (defaults to `https://api.weather-ai.co`).
-- **No Pro-only endpoints** — no `forecast14`, `insights`, webhooks, SMS, or USSD.
-- **Error handling:** typed `ApiError` for **401 / 403 / 429 / 500 / 503** + network/offline, each surfaced as a friendly message with retry where it makes sense.
 
 > Note: every weather endpoint returns the same combined bundle (location + current + hourly + daily), so the app makes **one** `weather-geo` request and derives every screen from it — minimising API usage.
 
@@ -128,7 +122,6 @@ cp .env.example .env
 #   EXPO_PUBLIC_WEATHERAI_KEY=wai_your_key_here
 #   EXPO_PUBLIC_WEATHERAI_BASE_URL=https://api.weather-ai.co
 ```
-The real `.env` is **gitignored** — secrets never get committed.
 
 ### Run
 ```bash
@@ -147,7 +140,6 @@ cd app
 npx eas-cli login                 # or set EXPO_TOKEN in .env
 npx eas-cli build --platform android --profile preview   # installable APK
 ```
-Profiles live in [`app/eas.json`](app/eas.json): `preview` → installable **APK**, `production` → **app-bundle**.
 
 ---
 
@@ -158,7 +150,7 @@ Profiles live in [`app/eas.json`](app/eas.json): `preview` → installable **APK
 | **Single `weather-geo` request drives all screens** | Every endpoint returns the same bundle, so one call minimises API usage |
 | **Client-side unit conversion** | Switching °C/°F never triggers a network request |
 | **30-min refresh cooldown** | Weather changes ~hourly; protects the free-tier quota while staying fresh |
-| **Fact-only summary** | The API has no AI-text field (and `insights` is out of scope), so the summary is composed **only** from real fields — never fabricated |
+| **Fact-only summary** | The API has no AI-text field (and `insights` is out of scope), so the summary is composed **only** from real fields  never fabricated |
 | **Swappable storage layer** | AsyncStorage today for fast Expo-Go dev; one-file swap to MMKV in a native build |
 | **Condition × time-of-day backdrop** | Makes the app feel alive and informative at a glance, theme-aware and contrast-checked |
 
@@ -178,6 +170,6 @@ MIT — see [LICENSE](app/LICENSE).
 
 <div align="center">
 
-**Built with ❤️ using React Native, TypeScript, and WeatherAI**
+**Built with ❤️ using React Native, TypeScript, and WeatherAI.**
 
 </div>
