@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+app/node_modules/
+
+# Expo
+app/.expo/
+app/dist/
+app/web-build/
+*.orig.*
+
+# Native
+app/android/
+app/ios/
+
+# Metro / build artifacts
+.metro-health-check*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.vscode/
+.idea/
+
+# EAS local credentials
+app/credentials.json

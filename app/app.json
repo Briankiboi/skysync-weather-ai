@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "SkySync",
+    "slug": "skysync-weather-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/skysync-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2A1A5E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.skysync.weatherai"
+    },
+    "android": {
+      "package": "com.skysync.weatherai",
+      "adaptiveIcon": {
+        "backgroundColor": "#2A1A5E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
