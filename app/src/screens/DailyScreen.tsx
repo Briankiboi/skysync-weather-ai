@@ -1,6 +1,15 @@
 import { StyleSheet, View } from 'react-native';
-import { Card, Screen, Skeleton, ThemedText } from '@/components';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  OfflineBanner,
+  Screen,
+  Skeleton,
+  ThemedText,
+} from '@/components';
 import { useAppWeather } from '@/hooks/useAppWeather';
+import { useOnline } from '@/hooks/useOnline';
 import { spacing } from '@/theme';
 import {
   conditionEmoji,
@@ -11,10 +20,33 @@ import {
 
 /** Daily forecast — one card per day (Phase 5). */
 export function DailyScreen() {
-  const { daily, units, isLoading } = useAppWeather();
+  const { daily, units, isLoading, error, refresh } = useAppWeather();
+  const online = useOnline();
+
+  if (!isLoading && daily.length === 0) {
+    if (!online) {
+      return (
+        <Screen>
+          <EmptyState
+            emoji="📡"
+            title="You’re offline"
+            message="Connect to load the daily forecast."
+          />
+        </Screen>
+      );
+    }
+    if (error) {
+      return (
+        <Screen>
+          <ErrorState error={error} onRetry={() => refresh()} />
+        </Screen>
+      );
+    }
+  }
 
   return (
     <Screen scroll>
+      {!online && <OfflineBanner />}
       <ThemedText variant="title">Daily forecast</ThemedText>
 
       {isLoading && daily.length === 0

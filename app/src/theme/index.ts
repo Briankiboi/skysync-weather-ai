@@ -34,6 +34,8 @@ type ColorTokens = {
   text: string;
   textMuted: string;
   textFaint: string;
+  /** Warm accent for small section labels (adds life; contrast-tuned). */
+  label: string;
   onPrimary: string;
   success: string;
   warning: string;
@@ -68,6 +70,7 @@ export const lightColors: ColorTokens = {
   text: '#0F172A',
   textMuted: '#64748B',
   textFaint: '#94A3B8',
+  label: '#B45309', // deep amber — readable on light cards
   onPrimary: palette.white,
 
   // Status
@@ -109,6 +112,7 @@ export const darkColors: ColorTokens = {
   text: '#F1F5F9',
   textMuted: '#AEB9CC',
   textFaint: '#7C8AA3',
+  label: '#FBBF24', // bright gold — pops on dark cards
   onPrimary: '#0B1226',
 
   // Status

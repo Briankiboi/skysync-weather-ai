@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Units, HourlyEntry } from '@/types/weather';
+import { ClockFormat } from '@/types/settings';
 import { spacing } from '@/theme';
 import { conditionEmoji, formatTemp, shortHour } from '@/utils/weather';
 import { Card } from './Card';
@@ -8,6 +9,7 @@ import { ThemedText } from './ThemedText';
 type Props = {
   hourly: HourlyEntry[];
   units: Units;
+  clock?: ClockFormat;
   /** How many upcoming hours to show. */
   count?: number;
 };
@@ -16,7 +18,7 @@ type Props = {
  * Horizontal hourly strip for the Home screen — time, icon, temp, and rain
  * chance for the next hours. Uses data already fetched (no extra API call).
  */
-export function HourlyStrip({ hourly, units, count = 16 }: Props) {
+export function HourlyStrip({ hourly, units, clock = '12h', count = 16 }: Props) {
   const now = Date.now();
   const upcoming = hourly
     .filter((h) => new Date(h.time).getTime() >= now - 3600_000)
@@ -26,7 +28,7 @@ export function HourlyStrip({ hourly, units, count = 16 }: Props) {
 
   return (
     <Card style={styles.card}>
-      <ThemedText variant="label" muted style={styles.title}>
+      <ThemedText variant="label" style={styles.title}>
         Next hours
       </ThemedText>
       <ScrollView
@@ -40,7 +42,7 @@ export function HourlyStrip({ hourly, units, count = 16 }: Props) {
         {upcoming.map((h, i) => (
           <View key={h.time} style={styles.cell}>
             <ThemedText variant="caption" muted>
-              {i === 0 ? 'Now' : shortHour(h.time)}
+              {i === 0 ? 'Now' : shortHour(h.time, clock)}
             </ThemedText>
             <ThemedText style={styles.emoji}>
               {conditionEmoji(h.condition_code)}

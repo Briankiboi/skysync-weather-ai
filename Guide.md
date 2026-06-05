@@ -98,7 +98,7 @@ Phase 8: build and deliver
 2. Generate an Android APK.
 3. Test on a real physical device.
 4. Fix build/runtime issues.
-5. Prepare a clean GitHub repo.
+5. Prepare a clean GitHub repo. update readme with with what we have done.
 
 Acceptance criteria
 - App launches successfully.

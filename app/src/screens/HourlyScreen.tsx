@@ -1,7 +1,17 @@
 import { Fragment } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Card, Screen, Skeleton, ThemedText } from '@/components';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  OfflineBanner,
+  Screen,
+  Skeleton,
+  ThemedText,
+} from '@/components';
 import { useAppWeather } from '@/hooks/useAppWeather';
+import { useOnline } from '@/hooks/useOnline';
+import { useSettingsStore } from '@/store/settingsStore';
 import { spacing } from '@/theme';
 import {
   conditionEmoji,
@@ -14,17 +24,41 @@ import {
 
 /** Hourly forecast — next 24 hours, grouped by day (Phase 5). */
 export function HourlyScreen() {
-  const { hourly, units, isLoading } = useAppWeather();
+  const { hourly, units, isLoading, error, refresh } = useAppWeather();
+  const clock = useSettingsStore((s) => s.clockFormat);
+  const online = useOnline();
 
   const now = Date.now();
   const upcoming = hourly
     .filter((h) => new Date(h.time).getTime() >= now - 3600_000)
     .slice(0, 24);
 
+  if (!isLoading && upcoming.length === 0) {
+    if (!online) {
+      return (
+        <Screen>
+          <EmptyState
+            emoji="📡"
+            title="You’re offline"
+            message="Connect to load the hourly forecast."
+          />
+        </Screen>
+      );
+    }
+    if (error) {
+      return (
+        <Screen>
+          <ErrorState error={error} onRetry={() => refresh()} />
+        </Screen>
+      );
+    }
+  }
+
   let lastDay = '';
 
   return (
     <Screen scroll>
+      {!online && <OfflineBanner />}
       <ThemedText variant="title">Hourly forecast</ThemedText>
 
       {isLoading && upcoming.length === 0
@@ -40,13 +74,13 @@ export function HourlyScreen() {
             return (
               <Fragment key={h.time}>
                 {showHeader && (
-                  <ThemedText variant="label" muted style={styles.dayHeader}>
+                  <ThemedText variant="label" style={styles.dayHeader}>
                     {i === 0 ? 'Today' : dayMonth(h.time)}
                   </ThemedText>
                 )}
                 <Card style={styles.row}>
                   <ThemedText variant="body" style={styles.hour}>
-                    {i === 0 ? 'Now' : shortHour(h.time)}
+                    {i === 0 ? 'Now' : shortHour(h.time, clock)}
                   </ThemedText>
                   <ThemedText style={styles.emoji}>
                     {conditionEmoji(h.condition_code)}

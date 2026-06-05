@@ -1,10 +1,23 @@
-import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Card, HourlyStrip, Screen, Skeleton, ThemedText } from '@/components';
+import { Ionicons } from '@expo/vector-icons';
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, StyleSheet, View } from 'react-native';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  HourlyGraph,
+  OfflineBanner,
+  Screen,
+  Skeleton,
+  ThemedText,
+  ThemeToggle,
+} from '@/components';
 import { useAppWeather } from '@/hooks/useAppWeather';
+import { useOnline } from '@/hooks/useOnline';
 import { useSettingsStore } from '@/store/settingsStore';
 import { spacing } from '@/theme';
 import { useSky } from '@/theme/SkyContext';
+import { useTheme } from '@/theme/useTheme';
 import { conditionFromText, timeOfDayFromHour } from '@/theme/sky';
 import { countryFlag } from '@/utils/country';
 import { buildSummary } from '@/utils/summary';
@@ -17,12 +30,33 @@ import {
   windDirection,
 } from '@/utils/weather';
 
-/** Home — live current conditions (Phase 5). */
+/** Home — live current conditions (Phase 5) with smart pull-to-refresh. */
 export function HomeScreen() {
-  const { current, hourly, daily, place, countryCode, units, isLoading, error, isRefreshing } =
-    useAppWeather();
+  const {
+    current, hourly, daily, city, countryCode, units,
+    isLoading, error, isRefreshing, refresh,
+  } = useAppWeather();
   const aiSummaryEnabled = useSettingsStore((s) => s.aiSummaryEnabled);
+  const clock = useSettingsStore((s) => s.clockFormat);
+  const online = useOnline();
   const { setSky } = useSky();
+  const { colors } = useTheme();
+
+  // Pull-to-refresh. The cooldown is enforced quietly: if it's not time yet we
+  // don't fetch, and briefly confirm "Already up to date" so the user knows
+  // their pull was registered (no permanent countdown / banner).
+  const [pulling, setPulling] = useState(false);
+  const [upToDate, setUpToDate] = useState(false);
+
+  const onPull = useCallback(async () => {
+    setPulling(true);
+    const result = await refresh();
+    if (result.status === 'cooldown') {
+      setUpToDate(true);
+      setTimeout(() => setUpToDate(false), 2000);
+    }
+    setPulling(false);
+  }, [refresh]);
 
   // Drive the dynamic background from the live condition + local hour.
   useEffect(() => {
@@ -35,48 +69,76 @@ export function HomeScreen() {
     });
   }, [current, setSky]);
 
+  // Still loading the very first data.
   if (isLoading && !current) return <HomeLoading />;
 
-  if (error && !current) {
+  // No cached data to fall back on:
+  if (!current) {
+    if (!online) {
+      return (
+        <Screen>
+          <EmptyState
+            emoji="📡"
+            title="You’re offline"
+            message="Connect to the internet to load the latest weather. Saved weather will appear here once you’ve loaded it at least once."
+          />
+        </Screen>
+      );
+    }
     return (
       <Screen>
-        <ThemedText variant="label" muted>
-          Current weather
-        </ThemedText>
-        <Card style={styles.errorCard}>
-          <ThemedText variant="heading">Can’t load weather</ThemedText>
-          <ThemedText variant="caption" muted style={styles.errorMsg}>
-            {error.message}
-          </ThemedText>
-        </Card>
+        <ErrorState error={error} onRetry={() => refresh()} />
       </Screen>
     );
   }
 
-  if (!current) return <HomeLoading />;
-
   return (
-    <Screen scroll>
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl
+          refreshing={pulling || isRefreshing}
+          onRefresh={onPull}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
+      {!online && <OfflineBanner />}
+
       <View style={styles.header}>
-        <ThemedText variant="label" muted>
-          Current weather
-        </ThemedText>
         <ThemedText variant="caption" muted>
-          {isRefreshing ? 'Updating…' : `Updated ${relativeTime(current.time, Date.now())}`}
+          {upToDate
+            ? 'Already up to date'
+            : isRefreshing
+              ? 'Updating…'
+              : `Updated ${relativeTime(current.time, Date.now())}`}
+        </ThemedText>
+        <ThemeToggle />
+      </View>
+
+      <View style={styles.hero}>
+        <ThemedText style={styles.heroIcon}>
+          {conditionEmoji(current.condition_code)}
+        </ThemedText>
+        <ThemedText variant="display" style={styles.heroTemp}>
+          {formatTemp(current.temperature, units)}
+        </ThemedText>
+        {city ? (
+          <ThemedText variant="caption" muted style={styles.heroCity}>
+            {countryFlag(countryCode)} {city}
+          </ThemedText>
+        ) : null}
+        <ThemedText variant="heading" muted>
+          {conditionLabel(current.condition_code)}
+        </ThemedText>
+        <ThemedText variant="body" muted style={styles.heroMeta}>
+          Feels like {formatTemp(current.feels_like, units)}
+          {daily[0]
+            ? `  ·  High ${formatTemp(daily[0].temp_max, units)}  ·  Low ${formatTemp(daily[0].temp_min, units)}`
+            : ''}
         </ThemedText>
       </View>
-
-      <ThemedText variant="caption" muted style={styles.location}>
-        {countryFlag(countryCode)} {place}
-      </ThemedText>
-
-      <View style={styles.heroRow}>
-        <ThemedText variant="display">{formatTemp(current.temperature, units)}</ThemedText>
-        <ThemedText style={styles.emoji}>{conditionEmoji(current.condition_code)}</ThemedText>
-      </View>
-      <ThemedText variant="heading" muted>
-        {conditionLabel(current.condition_code)}
-      </ThemedText>
 
       <View style={styles.metrics}>
         <Metric label="Feels like" value={formatTemp(current.feels_like, units)} />
@@ -89,14 +151,17 @@ export function HomeScreen() {
       </View>
 
       {/* Hourly analytics strip — uses already-fetched data, no extra API call */}
-      <HourlyStrip hourly={hourly} units={units} />
+      <HourlyGraph hourly={hourly} units={units} clock={clock} />
 
       {/* Smart summary (respects the AI-summary toggle in Settings) */}
       {aiSummaryEnabled && (
         <Card style={styles.summaryCard}>
-          <ThemedText variant="label" muted>
-            Summary
-          </ThemedText>
+          <View style={styles.summaryHead}>
+            <Ionicons name="sparkles-outline" size={16} color={colors.primary} />
+            <ThemedText variant="label">
+              Daily summary
+            </ThemedText>
+          </View>
           <ThemedText variant="body" style={styles.summaryText}>
             {buildSummary(current, hourly, daily[0], units)}
           </ThemedText>
@@ -109,7 +174,7 @@ export function HomeScreen() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <Card style={styles.metric}>
-      <ThemedText variant="label" muted>
+      <ThemedText variant="label">
         {label}
       </ThemedText>
       <ThemedText variant="heading" style={styles.metricValue}>
@@ -122,7 +187,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 function HomeLoading() {
   return (
     <Screen>
-      <ThemedText variant="label" muted>
+      <ThemedText variant="label">
         Current weather
       </ThemedText>
       <View style={styles.loadingHero}>
@@ -147,17 +212,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  location: {
-    marginTop: spacing.xs,
-  },
-  heroRow: {
-    flexDirection: 'row',
+  hero: {
     alignItems: 'center',
-    gap: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.xl,
+    gap: spacing.xs,
   },
-  emoji: {
-    fontSize: 44,
+  heroIcon: {
+    fontSize: 64,
+    marginBottom: spacing.xs,
+  },
+  heroTemp: {
+    textAlign: 'center',
+  },
+  heroCity: {
+    textAlign: 'center',
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  heroMeta: {
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
   metrics: {
     flexDirection: 'row',
@@ -176,17 +250,15 @@ const styles = StyleSheet.create({
   loadingHero: {
     marginTop: spacing.lg,
   },
-  errorCard: {
-    marginTop: spacing.lg,
-    gap: spacing.sm,
-  },
-  errorMsg: {
-    marginTop: spacing.xs,
-  },
   summaryCard: {
     marginTop: spacing.lg,
     gap: spacing.md,
     paddingVertical: spacing.xl,
+  },
+  summaryHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   summaryText: {
     lineHeight: 26,

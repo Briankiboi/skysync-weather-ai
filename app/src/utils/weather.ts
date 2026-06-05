@@ -70,16 +70,20 @@ export function shortDay(iso: string): string {
 }
 
 /**
- * Hour label following the phone's 12h/24h preference.
- * Device set to 12-hour -> "3 PM"; set to 24-hour -> "15:00".
+ * Hour label in the user's chosen clock format.
+ * '12h' -> "3 PM"; '24h' -> "15:00". (RN can't read the device's clock
+ * setting reliably, so the user picks this in Settings.)
  */
-export function shortHour(iso: string): string {
+export function shortHour(iso: string, clock: '12h' | '24h' = '12h'): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: usesTwelveHour(),
-  }).replace(':00', ''); // drop ":00" for clean whole hours where possible
+  const twelve = clock === '12h';
+  return d
+    .toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: twelve,
+    })
+    .replace(':00', ''); // drop ":00" for clean whole hours
 }
 
 /** "Mon, 9 Jun" — used to mark when the hourly list crosses into a new day. */

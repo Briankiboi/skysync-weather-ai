@@ -48,33 +48,47 @@ export function conditionFromText(text?: string): SkyCondition {
  * Modern pastel tints per condition; bottom fades to near-white.
  */
 const LIGHT: Record<SkyCondition, [string, string, string]> = {
-  clear: ['#E8F2FF', '#F3F8FF', '#FFFFFF'],
-  partly: ['#E6EFFB', '#F2F7FE', '#FFFFFF'],
-  cloudy: ['#EAEEF3', '#F4F6F9', '#FFFFFF'],
-  rain: ['#E3EAF1', '#EEF3F8', '#FFFFFF'],
-  storm: ['#E4E7EE', '#EFF1F6', '#FFFFFF'],
-  snow: ['#EEF4F9', '#F6FAFD', '#FFFFFF'],
-  fog: ['#EDEFF2', '#F5F6F8', '#FFFFFF'],
+  // Bright sunny blue sky
+  clear: ['#7EC0FF', '#B8DEFF', '#EAF5FF'],
+  // Blue sky with a hint of cloud grey
+  partly: ['#9CC7EC', '#C7DEF2', '#EDF3FA'],
+  // Soft overcast grey
+  cloudy: ['#AAB4BF', '#C9D1D9', '#EDEFF2'],
+  // Cooler, rainy blue-grey
+  rain: ['#8C9CAB', '#AEBDC9', '#E2E8EE'],
+  // Moody storm grey
+  storm: ['#7C8694', '#9AA4B2', '#DADEE4'],
+  // Crisp pale snow blue
+  snow: ['#C2D6E6', '#DCE9F3', '#F3F8FC'],
+  // Hazy desaturated grey
+  fog: ['#B6BCC2', '#D0D4D9', '#EEF0F2'],
 };
 
-/** Warm light tints for dawn/dusk (still light overall). */
-const LIGHT_WARM: [string, string, string] = ['#FFEFE0', '#FFF6EE', '#FFFFFF'];
+/** Warm sunrise/sunset tints (light overall). */
+const LIGHT_WARM: [string, string, string] = ['#FFC089', '#FFD9B0', '#FFF0E0'];
 
 /**
  * DARK mode skies — deep modern colors per condition.
  */
 const DARK: Record<SkyCondition, [string, string, string]> = {
-  clear: ['#0E1730', '#14213F', '#0B1226'],
-  partly: ['#101A33', '#172642', '#0C1428'],
-  cloudy: ['#161C28', '#1F2733', '#10141C'],
-  rain: ['#121A26', '#1A2532', '#0D131C'],
-  storm: ['#0F141E', '#181F2C', '#0A0E16'],
-  snow: ['#16202F', '#202C40', '#101726'],
-  fog: ['#171B22', '#212733', '#10131A'],
+  // Clear night — deep starry royal blue
+  clear: ['#16336B', '#102449', '#0A1730'],
+  // Partly — indigo-blue night
+  partly: ['#22315E', '#172445', '#0E182F'],
+  // Cloudy — distinct slate grey
+  cloudy: ['#2B333F', '#20262F', '#14181F'],
+  // Rain — cool teal-grey (recognizably "wet")
+  rain: ['#15303A', '#102329', '#0A171C'],
+  // Storm — near-black with a cold edge
+  storm: ['#1A1F2B', '#11141C', '#08090D'],
+  // Snow — icy deep blue
+  snow: ['#1F3A57', '#172B42', '#0F1D2E'],
+  // Fog — desaturated charcoal
+  fog: ['#2A2F36', '#1E2228', '#13161A'],
 };
 
-/** Warm dark tints for dusk. */
-const DARK_WARM: [string, string, string] = ['#241826', '#1C1622', '#120E18'];
+/** Warm purple sunset tint for dusk in dark mode. */
+const DARK_WARM: [string, string, string] = ['#4A2456', '#321840', '#1C0E28'];
 
 /** Resolve the sky for a condition + time of day + color scheme. */
 export function resolveSky(

@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
-import { SavedLocation, Settings, Units } from '../types/settings';
+import {
+  ClockFormat,
+  SavedLocation,
+  Settings,
+  ThemeMode,
+  Units,
+} from '../types/settings';
 import { storage } from '../utils/storage';
 
 type SettingsState = Settings & {
@@ -8,6 +14,9 @@ type SettingsState = Settings & {
   setUnits: (units: Units) => void;
   toggleUnits: () => void;
   setAiSummaryEnabled: (enabled: boolean) => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  toggleTheme: (currentIsDark: boolean) => void;
+  setClockFormat: (format: ClockFormat) => void;
   addLocation: (location: SavedLocation) => void;
   removeLocation: (id: string) => void;
 };
@@ -19,12 +28,15 @@ const zustandStorage: StateStorage = {
   removeItem: (name) => storage.remove(name),
 };
 
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       // Defaults
       units: 'metric',
       aiSummaryEnabled: true,
+      themeMode: 'auto',
+      clockFormat: '12h',
       savedLocations: [],
       hydrated: false,
 
@@ -32,6 +44,15 @@ export const useSettingsStore = create<SettingsState>()(
       toggleUnits: () =>
         set({ units: get().units === 'metric' ? 'imperial' : 'metric' }),
       setAiSummaryEnabled: (aiSummaryEnabled) => set({ aiSummaryEnabled }),
+
+      setThemeMode: (themeMode) => set({ themeMode }),
+      // Toggle strictly between light and dark. `currentIsDark` is the
+      // currently-resolved scheme (so an 'auto' user flips to the opposite of
+      // what they're seeing).
+      toggleTheme: (currentIsDark) =>
+        set({ themeMode: currentIsDark ? 'light' : 'dark' }),
+
+      setClockFormat: (clockFormat) => set({ clockFormat }),
 
       addLocation: (location) =>
         set((state) =>
@@ -50,6 +71,8 @@ export const useSettingsStore = create<SettingsState>()(
       partialize: (state) => ({
         units: state.units,
         aiSummaryEnabled: state.aiSummaryEnabled,
+        themeMode: state.themeMode,
+        clockFormat: state.clockFormat,
         savedLocations: state.savedLocations,
       }),
       onRehydrateStorage: () => (state) => {

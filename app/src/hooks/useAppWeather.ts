@@ -1,43 +1,73 @@
 /**
- * App weather flow (Phase 4).
+ * App weather flow (Phase 4) with a 45-minute refresh cooldown.
  *
- * A SINGLE call to /v1/weather-geo?ip=auto returns everything we need:
- * detected location, ip_geo (city/country), current, hourly, and daily.
- * So we use just that one request — no separate /v1/weather call — which
- * keeps API usage minimal. Units are converted client-side in the formatters,
- * so changing units never triggers a network request.
+ * A SINGLE call to /v1/weather-geo?ip=auto returns everything we need
+ * (location, ip_geo, current, hourly, daily), so we use just that one request.
+ * Units are converted client-side, so changing units never hits the network.
  *
- * Cached data renders immediately (persisted client) and a background refresh
- * updates it only when stale; successful responses are saved locally.
+ * Refresh cooldown: after a successful fetch we record the time and block any
+ * further API calls — foreground (pull-to-refresh) or background — for 45 min.
+ * The timestamp is persisted, so the cooldown survives app restarts.
  */
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { enrichCurrent } from '@/api/weather';
 import { useSettingsStore } from '@/store/settingsStore';
+import {
+  canRefresh,
+  cooldownRemaining,
+  useRefreshStore,
+} from '@/store/refreshStore';
 import { countryName } from '@/utils/country';
 import { useWeatherGeo } from './useWeather';
 
+export type RefreshResult =
+  | { status: 'refreshing' }
+  | { status: 'cooldown'; minutesLeft: number };
+
 export function useAppWeather() {
   const units = useSettingsStore((s) => s.units);
+  const lastRefresh = useRefreshStore((s) => s.lastRefresh);
+  const markRefreshed = useRefreshStore((s) => s.markRefreshed);
 
-  // One request gives location + ip_geo + current + hourly + daily.
   const geo = useWeatherGeo(7);
   const bundle = geo.data ?? null;
 
+  // Record a successful fetch time (drives the cooldown). We watch dataUpdatedAt
+  // so we only stamp when fresh data actually arrives.
+  const lastStamped = useRef(0);
+  useEffect(() => {
+    if (geo.isSuccess && geo.dataUpdatedAt && geo.dataUpdatedAt !== lastStamped.current) {
+      lastStamped.current = geo.dataUpdatedAt;
+      markRefreshed(geo.dataUpdatedAt);
+    }
+  }, [geo.isSuccess, geo.dataUpdatedAt, markRefreshed]);
+
   const countryCode = bundle?.ip_geo?.country ?? bundle?.location?.country;
+  const city = bundle?.ip_geo?.city ?? '';
   const place = useMemo(() => {
-    const city = bundle?.ip_geo?.city;
     const country = countryCode ? countryName(countryCode) : '';
     if (city) return country ? `${city}, ${country}` : city;
     return country || 'Your location';
-  }, [bundle, countryCode]);
+  }, [city, countryCode]);
 
-  // current lacks humidity/feels-like/UV — enrich from the nearest hourly entry.
   const current = useMemo(() => (bundle ? enrichCurrent(bundle) : null), [bundle]);
+
+  /** Cooldown-aware manual refresh (used by pull-to-refresh). */
+  const refresh = useCallback(async (): Promise<RefreshResult> => {
+    const now = Date.now();
+    if (!canRefresh(lastRefresh, now)) {
+      const minutesLeft = Math.ceil(cooldownRemaining(lastRefresh, now) / 60000);
+      return { status: 'cooldown', minutesLeft };
+    }
+    await geo.refetch();
+    return { status: 'refreshing' };
+  }, [lastRefresh, geo]);
 
   return {
     bundle,
     units,
     place,
+    city,
     countryCode,
     location: bundle?.location ?? null,
     current,
@@ -46,6 +76,11 @@ export function useAppWeather() {
     isLoading: geo.isLoading,
     isRefreshing: geo.isFetching,
     error: geo.error ?? null,
-    refetch: geo.refetch,
+    refresh,
+    // Cooldown info for the UI.
+    lastRefresh,
+    cooldownMsLeft: cooldownRemaining(lastRefresh, Date.now()),
+    // Data source: live if the last fetch is recent, else cached.
+    isCached: !geo.isFetching && geo.isStale,
   };
 }

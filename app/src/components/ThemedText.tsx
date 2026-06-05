@@ -19,7 +19,11 @@ export function ThemedText({
   ...rest
 }: Props) {
   const { colors } = useTheme();
-  const resolved = color ?? (muted ? colors.textMuted : colors.text);
+  // Small section labels get the warm accent by default (adds life). An
+  // explicit `color` always wins; `muted` still dims when you want it plain.
+  const fallback =
+    variant === 'label' && !muted ? colors.label : muted ? colors.textMuted : colors.text;
+  const resolved = color ?? fallback;
   return <RNText style={[styles[variant], { color: resolved }, style]} {...rest} />;
 }
 

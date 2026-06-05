@@ -1,15 +1,37 @@
 import { StyleSheet, View } from 'react-native';
-import { Card, Screen, Skeleton, ThemedText } from '@/components';
+import {
+  Card,
+  EmptyState,
+  OfflineBanner,
+  Screen,
+  Skeleton,
+  ThemedText,
+} from '@/components';
 import { useUsage } from '@/hooks/useWeather';
+import { useOnline } from '@/hooks/useOnline';
 import { radius, spacing } from '@/theme';
 import { useTheme } from '@/theme/useTheme';
 
 /** Usage — friendly view of your monthly allowance (from /v1/usage). */
 export function UsageScreen() {
   const { data, isLoading, error } = useUsage();
+  const online = useOnline();
+
+  if (!isLoading && !data && !online) {
+    return (
+      <Screen>
+        <EmptyState
+          emoji="📡"
+          title="You’re offline"
+          message="Connect to see your usage."
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll>
+      {!online && <OfflineBanner />}
       <ThemedText variant="title">Usage</ThemedText>
       <ThemedText variant="caption" muted style={styles.subtitle}>
         How much of your monthly weather allowance you’ve used.
@@ -22,6 +44,7 @@ export function UsageScreen() {
         </Card>
       ) : error && !data ? (
         <Card style={styles.card}>
+          <ThemedText variant="body">Couldn’t load usage</ThemedText>
           <ThemedText variant="caption" muted>
             {error.message}
           </ThemedText>
