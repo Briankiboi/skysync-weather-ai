@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import {
   Card,
@@ -14,6 +14,7 @@ import {
 } from '@/components';
 import { useAppWeather } from '@/hooks/useAppWeather';
 import { useOnline } from '@/hooks/useOnline';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useSettingsStore } from '@/store/settingsStore';
 import { spacing } from '@/theme';
 import { useSky } from '@/theme/SkyContext';
@@ -42,21 +43,8 @@ export function HomeScreen() {
   const { setSky } = useSky();
   const { colors } = useTheme();
 
-  // Pull-to-refresh. The cooldown is enforced quietly: if it's not time yet we
-  // don't fetch, and briefly confirm "Already up to date" so the user knows
-  // their pull was registered (no permanent countdown / banner).
-  const [pulling, setPulling] = useState(false);
-  const [upToDate, setUpToDate] = useState(false);
-
-  const onPull = useCallback(async () => {
-    setPulling(true);
-    const result = await refresh();
-    if (result.status === 'cooldown') {
-      setUpToDate(true);
-      setTimeout(() => setUpToDate(false), 2000);
-    }
-    setPulling(false);
-  }, [refresh]);
+  // Pull-to-refresh (shared hook; cooldown enforced quietly).
+  const { pulling, upToDate, onRefresh } = usePullToRefresh(refresh);
 
   // Drive the dynamic background from the live condition + local hour.
   useEffect(() => {
@@ -98,7 +86,7 @@ export function HomeScreen() {
       refreshControl={
         <RefreshControl
           refreshing={pulling || isRefreshing}
-          onRefresh={onPull}
+          onRefresh={onRefresh}
           tintColor={colors.primary}
           colors={[colors.primary]}
         />

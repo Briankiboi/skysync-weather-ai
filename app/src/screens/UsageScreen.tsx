@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 import {
   Card,
   EmptyState,
@@ -14,8 +15,17 @@ import { useTheme } from '@/theme/useTheme';
 
 /** Usage — friendly view of your monthly allowance (from /v1/usage). */
 export function UsageScreen() {
-  const { data, isLoading, error } = useUsage();
+  const { data, isLoading, error, refetch } = useUsage();
   const online = useOnline();
+  const { colors } = useTheme();
+
+  // /v1/usage is free (no quota cost), so it can refresh on pull anytime.
+  const [pulling, setPulling] = useState(false);
+  const onRefresh = async () => {
+    setPulling(true);
+    await refetch();
+    setPulling(false);
+  };
 
   if (!isLoading && !data && !online) {
     return (
@@ -30,7 +40,17 @@ export function UsageScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl
+          refreshing={pulling}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
       {!online && <OfflineBanner />}
       <ThemedText variant="title">Usage</ThemedText>
       <ThemedText variant="caption" muted style={styles.subtitle}>

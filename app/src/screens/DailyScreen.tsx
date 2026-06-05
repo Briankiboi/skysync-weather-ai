@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 import {
   Card,
   EmptyState,
@@ -10,7 +10,9 @@ import {
 } from '@/components';
 import { useAppWeather } from '@/hooks/useAppWeather';
 import { useOnline } from '@/hooks/useOnline';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { spacing } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import {
   conditionEmoji,
   conditionLabel,
@@ -22,6 +24,8 @@ import {
 export function DailyScreen() {
   const { daily, units, isLoading, error, refresh } = useAppWeather();
   const online = useOnline();
+  const { colors } = useTheme();
+  const { pulling, onRefresh } = usePullToRefresh(refresh);
 
   if (!isLoading && daily.length === 0) {
     if (!online) {
@@ -45,7 +49,17 @@ export function DailyScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl
+          refreshing={pulling}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
       {!online && <OfflineBanner />}
       <ThemedText variant="title">Daily forecast</ThemedText>
 

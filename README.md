@@ -2,25 +2,12 @@
 
 # SkySync 🌤️
 
-**Your Weather Intelligence** — a production-quality, offline-first weather app built with React Native and TypeScript.
+**Your Weather Intelligence**  a production-quality, offline-first weather app built with React Native and TypeScript.
 
 SkySync integrates the [WeatherAI](https://weather-ai.co) API directly, with a single clean API client, smart caching, an offline-first data layer, and a polished, adaptive UI that runs on **Android and iOS** from one codebase.
 
 </div>
 
----
-
-## Highlights
-
-- 🌍 **Zero-setup location** — detects your city automatically from your IP (`weather-geo?ip=auto`). No GPS, no permission prompts.
-- 🎨 **Adaptive weather backdrop** — the background gradient changes with the live condition *and* time of day (clear / cloudy / rain / storm / snow / fog × dawn / day / dusk / night), with a smooth cross-fade and a gentle ambient drift.
-- 📈 **Hourly temperature curve** — an elegant SVG line graph (Pixel-Weather style) instead of a flat list.
-- 🌗 **Light / Dark themes** — follows the system by default, with a one-tap manual toggle. Warm amber accent labels for life and contrast.
-- 📴 **Offline-first** — last successful response is cached and shown instantly; a friendly offline banner appears when there's no connection.
-- 🔄 **Smart pull-to-refresh** — pull to refresh with a 30-minute cooldown that protects your API quota (enforced silently, foreground *and* background).
-- 🧠 **Fact-only daily summary** — a concise written summary built **only** from real API fields (never fabricated), with a toggle in Settings.
-- 📊 **Usage view** — see how much of your monthly allowance you've used, with clean progress bars.
-- ⚙️ **Real settings** — units (°C/°F), 12h/24h clock, summary toggle — all persisted across restarts.
 
 ---
 
@@ -30,24 +17,25 @@ SkySync integrates the [WeatherAI](https://weather-ai.co) API directly, with a s
 |------|-------|--------|-------|----------|
 | Current conditions, hourly curve, daily summary | 7-day forecast cards | Hour-by-hour, grouped by day | Monthly quota with progress bars | Units, clock, summary, location |
 
-> Add screenshots to `docs/` and link them here for the repo gallery.
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| **Expo (SDK 54) + React Native 0.81** | Cross-platform (Android + iOS) framework |
-| **TypeScript (strict)** | Type-safe code, no `any` |
-| **React Navigation** (bottom tabs) | Navigation |
-| **Zustand** | Client/UI state (settings, refresh cooldown) — persisted |
-| **TanStack Query** (+ persist client) | Server-state caching, offline persistence, retries |
-| **react-native-svg** | Hourly temperature curve graph |
-| **expo-linear-gradient** | Adaptive animated weather backdrop |
-| **@react-native-community/netinfo** | Offline detection |
-| **AsyncStorage** (MMKV-ready) | Local persistence behind a swappable layer |
-| **EAS Build** | Android APK / iOS builds |
+| Technology | Version | Category | Purpose | Why This Choice |
+| ---------- | ------- | -------- | ------- | --------------- |
+| Expo | SDK 54 | Framework | Cross-platform mobile (Android + iOS) | Cloud builds via EAS, no native toolchain needed, reproducible |
+| React Native | 0.81.5 | Framework | UI rendering | Industry standard, large ecosystem, active maintenance |
+| TypeScript | 5.9.3 | Language | Type-safe codebase (strict) | Zero `any` types, compile-time errors, strong IntelliSense |
+| React Navigation | 7.2.5 | Navigation | Bottom tabs + screen transitions | Type-safe routing, native performance, large plugin ecosystem |
+| Zustand | 5.0.14 | State (client) | UI state — settings, refresh cooldown, saved locations | Tiny footprint, persist middleware, minimal boilerplate |
+| TanStack Query | 5.101.0 | State (server) | API caching, offline persistence, retry logic | Stale-while-revalidate, background refetch, deduped requests |
+| react-native-svg | 15.12.1 | Visualization | Hourly temperature curve graph | Vector graphics, smooth rendering, no image assets |
+| expo-linear-gradient | 15.0.8 | UI | Adaptive animated weather backdrop (colors by condition) | Native GPU rendering, smooth gradient transitions |
+| @react-native-community/netinfo | 11.4.1 | Utilities | Real-time offline detection (offline banner) | Subscription-based, instant network-state changes |
+| @react-native-async-storage/async-storage | 2.2.0 | Storage | Local persistence layer (MMKV-ready, swappable) | RN-standard, abstracted so it can swap to MMKV in a native build |
+| Fetch API | native | HTTP | Single WeatherAI client (Bearer auth, error mapping) | Built-in, no extra dependency; centralized errors in `client.ts` |
+| EAS Build | — | Build | Cloud-based Android APK / iOS builds | No Android Studio, signed builds, reproducible artifacts |
 
 ---
 
@@ -117,8 +105,8 @@ A **single API client** ([`app/src/api/client.ts`](app/src/api/client.ts)) handl
 
 ## Caching & Offline-First
 
-- **Instant load:** the TanStack Query cache is **persisted** locally (`QueryProvider`), so the last weather shows immediately on launch — even offline.
-- **Smart refresh cooldown:** after a successful fetch the timestamp is stored ([`refreshStore`](app/src/store/refreshStore.ts)); no further API call is made — pull-to-refresh **or** background — for **30 minutes**. The cooldown persists across app restarts.
+- **Instant load:** the TanStack Query cache is **persisted** locally (`QueryProvider`), so the last weather shows immediately on launch even offline.
+- **Smart refresh cooldown:** after a successful fetch the timestamp is stored ([`refreshStore`](app/src/store/refreshStore.ts)); no further API call is made — pull-to-refresh **or** background for **30 minutes**. The cooldown persists across app restarts.
 - **Offline UX:** a subtle "Offline — showing saved weather" banner appears; cached data stays visible. With no cache yet, a friendly empty state is shown.
 - **Retries:** transient failures retry once with exponential backoff; auth errors don't retry.
 
@@ -128,7 +116,7 @@ A **single API client** ([`app/src/api/client.ts`](app/src/api/client.ts)) handl
 
 ### Prerequisites
 - **Node.js 20 LTS**
-- A free **WeatherAI** API key — sign up at [weather-ai.co](https://weather-ai.co) → dashboard → **API Keys** (format `wai_...`)
+- A free **WeatherAI** API key  sign up at [weather-ai.co](https://weather-ai.co) → dashboard → **API Keys**
 - For device-over-cable dev: `adb` (`sudo apt install adb` on Ubuntu) + **Expo Go** on your phone
 
 ### Install & configure
@@ -176,16 +164,6 @@ Profiles live in [`app/eas.json`](app/eas.json): `preview` → installable **APK
 
 ---
 
-## Scripts
-
-| Command | What |
-|---------|------|
-| `npm run dev` | adb reverse + start dev server (Android over cable) |
-| `npm run start` | start dev server (QR / Expo Go) |
-| `npx tsc --noEmit` | type-check |
-| `npx expo export --platform android` | verify the JS bundle builds |
-
----
 
 ## Author
 
