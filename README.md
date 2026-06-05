@@ -159,8 +159,9 @@ npx eas-cli build --platform android --profile preview   # installable APK
 
 ## Author
 
-**Brian Kiboi** · Nairobi, Kenya · Full-Stack / Mobile Developer
 🌐 https://briankiboi.is-a.dev
+
+**Brian Kiboi** · Nairobi, Kenya · Full-Stack / Mobile Developer
 
 ## License
 
