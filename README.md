@@ -1,6 +1,6 @@
 <div align="center">
 
-# SkySync 🌤️
+# SkySync weather-ai 🌤️
 
 SkySync Weather is a modern weather intelligence application built with React Native and TypeScript.
 
