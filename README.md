@@ -19,11 +19,8 @@ The app integrates directly with [WeatherAI](https://weather-ai.co) API to deliv
   <img src="docs/screenshots/usage.png"  width="30%" alt="Usage screen" />
 </p>
 
-<p align="center">
-  <em>Branded splash · Home (current conditions + hourly curve + summary) · Usage &amp; API quota</em>
-</p>
 
-The app has five tabs: **Home · Daily · Hourly · Usage · Settings** — current conditions with an hourly temperature curve and a daily summary, a 7-day forecast, an hour-by-hour view grouped by day, your monthly API quota, and settings for units, clock format, summary, and location.
+The app has five tabs: **Home · Daily · Hourly · Usage · Settings** 
 
 ---
 
