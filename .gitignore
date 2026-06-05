@@ -31,3 +31,4 @@ yarn-error.*
 
 # EAS local credentials
 app/credentials.json
+

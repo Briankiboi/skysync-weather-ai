@@ -85,6 +85,7 @@ Phase 6: offline-first behavior
 4. Add graceful error handling for 401, 403, 429, 500, and 503.
 5. Retry temporary failures intelligently.
 
+
 Phase 7: quality
 1. Keep components small.
 2. Add strong TypeScript types.

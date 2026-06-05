@@ -2,8 +2,6 @@
 
 A production-quality, **offline-first** weather app built with **Expo (React Native)** and **TypeScript**. SkySync integrates the WeatherAI API to deliver real-time forecasts with intelligent local caching and seamless offline support — and runs on both **Android and iOS** from a single codebase.
 
-> **Status:** Phase 2 complete — app boots on device, navigation + architecture in place. WeatherAI integration (Phase 3) is next. See [Roadmap](#roadmap).
-
 ---
 
 ## Features
@@ -47,7 +45,7 @@ app/
 ├── tsconfig.json           # TS strict + "@/*" -> "src/*"
 ├── .env.example            # Env template (real .env is gitignored)
 └── src/
-    ├── api/                # Server-state: query client + (Phase 3) WeatherAI client
+    ├── api/                # Server-state: query client + WeatherAI client
     │   ├── queryClient.ts
     │   └── QueryProvider.tsx
     ├── components/         # Reusable UI primitives (barrel-exported)
@@ -68,7 +66,7 @@ app/
     │   └── RootNavigator.tsx
     ├── store/              # Zustand stores
     │   └── settingsStore.ts
-    ├── hooks/              # Custom React hooks (Phase 3+)
+    ├── hooks/              # Custom React hooks
     ├── theme/              # Design tokens (colors, spacing, type)
     │   └── index.ts
     ├── types/              # Shared TypeScript types
@@ -110,7 +108,7 @@ npm run start
 ```bash
 cd app
 cp .env.example .env
-# Phase 3+: add your WeatherAI key
+# Add your WeatherAI key
 #   EXPO_PUBLIC_WEATHERAI_KEY=wai_your_key_here
 ```
 The real `.env` is **gitignored** — secrets never get committed.
@@ -130,28 +128,13 @@ Profiles are defined in [`app/eas.json`](app/eas.json):
 
 ---
 
-## Roadmap
-
-| Phase | Scope | Status |
-|-------|-------|--------|
-| 1 | Scaffold Expo + TS, boots on device | ✅ Done |
-| 2 | Architecture: navigation, theme, components, Zustand, TanStack Query, storage | ✅ Done |
-| 3 | WeatherAI client + endpoints (`/v1/weather`, `geo`, `current`, `daily`, `hourly`, `usage`) | ⏳ Next |
-| 4 | App flow: auto-geo → fetch → cache-first render → background refresh | ⏳ |
-| 5 | Screens filled with real data (Home, Daily, Hourly, Usage) | ⏳ |
-| 6 | Offline-first polish: skeletons, empty states, error handling (401/403/429/5xx) | ⏳ |
-| 7 | Quality: strong types, small components, docs | ⏳ |
-| 8 | EAS production build, real-device test, swap AsyncStorage → MMKV | ⏳ |
-
----
-
 ## Notes on storage (AsyncStorage vs MMKV)
 
-The Guide targets **MMKV**. MMKV is a native module and can't run in standard **Expo Go**, which we use for fast hot-reload development. So persistence is built behind a small swappable layer in [`app/src/utils/storage.ts`](app/src/utils/storage.ts): it uses **AsyncStorage** today (Expo-Go friendly) and switches to **MMKV** with a one-file change when we cut the native build in Phase 8. The rest of the app is storage-agnostic.
+Persistence is built behind a small swappable layer in [`app/src/utils/storage.ts`](app/src/utils/storage.ts): it uses **AsyncStorage** today (Expo-Go friendly, keeps fast hot-reload) and can switch to **MMKV** with a one-file change in a native build. The rest of the app is storage-agnostic.
 
 ---
 
-## API Integration (Phase 3)
+## API Integration
 
 | Endpoint | Purpose |
 |----------|---------|
