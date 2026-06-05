@@ -13,10 +13,17 @@ The app integrates directly with [WeatherAI](https://weather-ai.co) API to deliv
 
 ## Screens
 
-| Home | Daily | Hourly | Usage | Settings |
-|------|-------|--------|-------|----------|
-| Current conditions, hourly curve, daily summary | 7-day forecast cards | Hour-by-hour, grouped by day | Monthly quota with progress bars | Units, clock, summary, location |
+<p align="center">
+  <img src="docs/screenshots/splash.png" width="30%" alt="Splash screen" />
+  <img src="docs/screenshots/home.png"   width="30%" alt="Home screen" />
+  <img src="docs/screenshots/usage.png"  width="30%" alt="Usage screen" />
+</p>
 
+<p align="center">
+  <em>Branded splash · Home (current conditions + hourly curve + summary) · Usage &amp; API quota</em>
+</p>
+
+The app has five tabs: **Home · Daily · Hourly · Usage · Settings** — current conditions with an hourly temperature curve and a daily summary, a 7-day forecast, an hour-by-hour view grouped by day, your monthly API quota, and settings for units, clock format, summary, and location.
 
 ---
 
