@@ -2,7 +2,7 @@
 
 # SkySync 🌤️
 
-Weather Intelligence  a production-quality, offline-first weather app built with React Native and TypeScript.
+Weather Intelligence is a weather app built with React Native and TypeScript.
 
 SkySync integrates the [WeatherAI](https://weather-ai.co) API directly, with a single clean API client, smart caching, an offline-first data layer, and a polished, adaptive UI that runs on **Android and iOS** from one codebase.
 
