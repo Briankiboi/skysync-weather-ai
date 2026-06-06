@@ -32,6 +32,10 @@ export function useAppWeather() {
   const geo = useWeatherGeo(7);
   const bundle = geo.data ?? null;
 
+  // Auto-recovery on reconnect is handled globally by TanStack Query's
+  // onlineManager (wired to NetInfo in queryClient.ts) — failed/stale queries
+  // refetch automatically when the network returns, on every screen.
+
   // Record a successful fetch time (drives the cooldown). We watch dataUpdatedAt
   // so we only stamp when fresh data actually arrives.
   const lastStamped = useRef(0);
