@@ -34,7 +34,7 @@ import {
 /** Home — live current conditions (Phase 5) with smart pull-to-refresh. */
 export function HomeScreen() {
   const {
-    current, hourly, daily, city, countryCode, units,
+    current, hourly, daily, place, city, countryCode, units,
     isLoading, error, isRefreshing, refresh,
   } = useAppWeather();
   const aiSummaryEnabled = useSettingsStore((s) => s.aiSummaryEnabled);
@@ -114,7 +114,7 @@ export function HomeScreen() {
         </ThemedText>
         {city ? (
           <ThemedText variant="caption" muted style={styles.heroCity}>
-            {countryFlag(countryCode)} {city}
+            {countryFlag(countryCode)} {place}
           </ThemedText>
         ) : null}
         <ThemedText variant="heading" muted>

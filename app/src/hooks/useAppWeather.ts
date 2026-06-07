@@ -18,6 +18,7 @@ import {
   useRefreshStore,
 } from '@/store/refreshStore';
 import { countryName } from '@/utils/country';
+import { useDeviceLocation } from './useDeviceLocation';
 import { useWeatherGeo } from './useWeather';
 
 export type RefreshResult =
@@ -29,12 +30,16 @@ export function useAppWeather() {
   const lastRefresh = useRefreshStore((s) => s.lastRefresh);
   const markRefreshed = useRefreshStore((s) => s.markRefreshed);
 
-  const geo = useWeatherGeo(7);
+  // Location: prefer the device's real GPS (accurate), fall back to the API's
+  // weather-geo?ip=auto when permission is denied or GPS is unavailable. One
+  // request returns location + current + hourly + daily for every screen.
+  const device = useDeviceLocation();
+  const coords = device.location
+    ? { lat: device.location.lat, lon: device.location.lon }
+    : null;
+  // Wait until GPS resolution finishes so we don't fetch ip=auto then refetch.
+  const geo = useWeatherGeo(7, coords, device.status !== 'resolving');
   const bundle = geo.data ?? null;
-
-  // Auto-recovery on reconnect is handled globally by TanStack Query's
-  // onlineManager (wired to NetInfo in queryClient.ts) — failed/stale queries
-  // refetch automatically when the network returns, on every screen.
 
   // Record a successful fetch time (drives the cooldown). We watch dataUpdatedAt
   // so we only stamp when fresh data actually arrives.
@@ -46,8 +51,24 @@ export function useAppWeather() {
     }
   }, [geo.isSuccess, geo.dataUpdatedAt, markRefreshed]);
 
-  const countryCode = bundle?.ip_geo?.country ?? bundle?.location?.country;
-  const city = bundle?.ip_geo?.city ?? '';
+  // Location name shown in the hero.
+  //
+  // When we have a real GPS fix we trust ONLY its reverse-geocoded name (e.g.
+  // "Kasarani"). We must NOT fall back to the API's ip_geo city here: on mobile
+  // that's always the carrier-gateway city ("Nairobi" for every Kenyan SIM), so
+  // falling back would overwrite the user's real area with the wrong one. If GPS
+  // resolved a fix but Nominatim couldn't name it, we show the flag only (no
+  // city) rather than a misleading hard-coded name.
+  //
+  // Only when there's no GPS fix at all (permission denied / unavailable) do we
+  // use the API's ip_geo as a best-effort fallback.
+  const hasGps = device.location != null;
+  const countryCode = hasGps
+    ? device.location?.country ?? bundle?.location?.country
+    : bundle?.ip_geo?.country ?? bundle?.location?.country;
+  const city = hasGps
+    ? device.location?.city ?? ''
+    : bundle?.ip_geo?.city ?? '';
   const place = useMemo(() => {
     const country = countryCode ? countryName(countryCode) : '';
     if (city) return country ? `${city}, ${country}` : city;
@@ -77,7 +98,10 @@ export function useAppWeather() {
     current,
     hourly: bundle?.hourly ?? [],
     daily: bundle?.daily ?? [],
-    isLoading: geo.isLoading,
+    // "Loading" includes the GPS-resolving phase (when the query is still
+    // disabled) AND the actual fetch — so screens show skeletons the whole
+    // time, never a blank screen, until the first data arrives.
+    isLoading: (device.status === 'resolving' || geo.isLoading) && !bundle,
     isRefreshing: geo.isFetching,
     error: geo.error ?? null,
     refresh,

@@ -24,11 +24,26 @@ export const weatherKeys = {
   usage: ['weather', 'usage'] as const,
 };
 
-/** Auto-detect location + full weather bundle. Runs on app launch. */
-export function useWeatherGeo(days = 7) {
+/**
+ * Location + full weather bundle. If GPS coords are given, they drive the
+ * request (precise); otherwise it falls back to ip=auto (per the Guide).
+ * `enabled` lets the caller wait until GPS resolution finishes first.
+ */
+export function useWeatherGeo(
+  days = 7,
+  coords?: { lat: number; lon: number } | null,
+  enabled = true,
+) {
+  // Round so tiny GPS jitter doesn't churn the cache key.
+  const lat = coords ? Math.round(coords.lat * 100) / 100 : undefined;
+  const lon = coords ? Math.round(coords.lon * 100) / 100 : undefined;
   return useQuery({
-    queryKey: [...weatherKeys.geo, days],
-    queryFn: () => getWeatherGeo({ ip: 'auto', days }),
+    queryKey: [...weatherKeys.geo, days, lat ?? 'ip', lon ?? 'auto'],
+    queryFn: () =>
+      coords
+        ? getWeatherGeo({ lat, lon, days })
+        : getWeatherGeo({ ip: 'auto', days }),
+    enabled,
   });
 }
 
